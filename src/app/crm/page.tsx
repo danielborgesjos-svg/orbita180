@@ -61,25 +61,25 @@ const CRMPage = () => {
       {activeTab === 'funnel' ? (
         <div style={{ overflowX: 'auto', flex: 1, paddingBottom: '1rem' }}>
           <div style={{ display: 'flex', gap: '1.5rem', minWidth: 'max-content' }}>
-            <KanbanColumn title="Novo Lead" count={12} color="#3b82f6">
-              <KanbanCard title="João Silva" subtitle="Projeto Educação" value="R$ 5.000" priority="Média" tags={[{label: 'Inbound', color: '#3b82f6'}]} />
-              <KanbanCard title="Maria Oliveira" subtitle="Plataforma SaaS" value="R$ 12.000" priority="Alta" tags={[{label: 'Recomendação', color: '#8b5cf6'}]} />
+            <KanbanColumn id="novo-lead" title="Novo Lead" count={12} color="#3b82f6">
+              <KanbanCard id="crm-lead-1" title="João Silva" subtitle="Projeto Educação" value="R$ 5.000" priority="Média" tags={[{label: 'Inbound', color: '#3b82f6'}]} />
+              <KanbanCard id="crm-lead-2" title="Maria Oliveira" subtitle="Plataforma SaaS" value="R$ 12.000" priority="Alta" tags={[{label: 'Recomendação', color: '#8b5cf6'}]} />
             </KanbanColumn>
             
-            <KanbanColumn title="Qualificado" count={5} color="#8b5cf6">
-              <KanbanCard title="Empresa ABC" subtitle="Consultoria B2B" value="R$ 25.000" priority="Alta" tags={[{label: 'Enterprise', color: '#10b981'}]} />
+            <KanbanColumn id="qualificado" title="Qualificado" count={5} color="#8b5cf6">
+              <KanbanCard id="crm-lead-3" title="Empresa ABC" subtitle="Consultoria B2B" value="R$ 25.000" priority="Alta" tags={[{label: 'Enterprise', color: '#10b981'}]} />
             </KanbanColumn>
             
-            <KanbanColumn title="Proposta" count={3} color="#f59e0b">
-              <KanbanCard title="Carlos Santos" subtitle="App Delivery" value="R$ 8.500" priority="Baixa" tags={[{label: 'Urgent', color: '#ef4444'}]} />
+            <KanbanColumn id="proposta" title="Proposta" count={3} color="#f59e0b">
+              <KanbanCard id="crm-lead-4" title="Carlos Santos" subtitle="App Delivery" value="R$ 8.500" priority="Baixa" tags={[{label: 'Urgent', color: '#ef4444'}]} />
             </KanbanColumn>
             
-            <KanbanColumn title="Negociação" count={2} color="#10b981">
-              <KanbanCard title="Tech Solutions" subtitle="Integração API" value="R$ 45.000" priority="Alta" />
+            <KanbanColumn id="negociacao" title="Negociação" count={2} color="#10b981">
+              <KanbanCard id="crm-lead-5" title="Tech Solutions" subtitle="Integração API" value="R$ 45.000" priority="Alta" />
             </KanbanColumn>
             
-            <KanbanColumn title="Fechado" count={24} color="#059669">
-              <KanbanCard title="Studio X" value="R$ 15.000" />
+            <KanbanColumn id="fechado" title="Fechado" count={24} color="#059669">
+              <KanbanCard id="crm-lead-6" title="Studio X" value="R$ 15.000" />
             </KanbanColumn>
           </div>
         </div>
