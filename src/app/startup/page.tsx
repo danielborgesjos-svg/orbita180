@@ -1,20 +1,49 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Users, UserPlus, Award, Mail, Linkedin, ShieldCheck, Settings, Edit3, Trash2
+  Users, UserPlus, Award, Mail, Linkedin, ShieldCheck, Settings, Edit3, Trash2,
+  Eye, Target, Heart, Rocket, DollarSign
 } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
+import { getStartupById, updateStartupDetails } from '@/lib/actions/startup';
 
 export default function StartupTeamPage() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'team' | 'access'>('team');
+  const [activeTab, setActiveTab] = useState<'overview' | 'team' | 'access'>('overview');
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [startup, setStartup] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   
+  const STARTUP_ID = 'startup-123'; // Mock
+
+  useEffect(() => {
+    loadStartup();
+  }, []);
+
+  async function loadStartup() {
+    setLoading(true);
+    const data = await getStartupById(STARTUP_ID);
+    setStartup(data);
+    setLoading(false);
+  }
+
+  async function handleSaveDetails(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+    
+    await updateStartupDetails(STARTUP_ID, data);
+    alert('Detalhes atualizados com sucesso!');
+    loadStartup();
+  }
+
   const members = [
     { id: 1, name: 'Daniel Borges', role: 'CEO & Founder', bio: 'Estrategista de produto e visão de mercado.', skills: ['Liderança', 'Pitch', 'Vendas'], profile: 95, access: 'Admin' },
     { id: 2, name: 'Aline Souza', role: 'CTO', bio: 'Especialista em arquitetura escalável e IA.', skills: ['Next.js', 'Cloud', 'Python'], profile: 88, access: 'Admin' },
     { id: 3, name: 'Ricardo Lima', role: 'COO', bio: 'Focado em processos e sucesso do cliente.', skills: ['Operações', 'CRM', 'Dados'], profile: 82, access: 'Membro' },
   ];
+
+  if (loading) return <div>Carregando dados da startup...</div>;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -22,7 +51,7 @@ export default function StartupTeamPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>Minha Startup</h1>
-          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.9rem' }}>Gerencie os detalhes, a equipe e as permissões da sua startup.</p>
+          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.9rem' }}>Gerencie o core business, equipe e permissões.</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button 
@@ -38,7 +67,7 @@ export default function StartupTeamPage() {
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '2rem', borderBottom: '1px solid var(--border)' }}>
         {[
-          { id: 'overview', label: 'Detalhes da Startup' },
+          { id: 'overview', label: 'Estratégia & Detalhes' },
           { id: 'team', label: 'Equipe & Organograma' },
           { id: 'access', label: 'Perfis de Acesso' }
         ].map((tab) => (
@@ -61,93 +90,88 @@ export default function StartupTeamPage() {
 
       {/* Content */}
       {activeTab === 'overview' && (
-        <div className="animate-fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem' }}>
+        <form onSubmit={handleSaveDetails} className="animate-fade-in" style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* Identity Section */}
             <div className="card premium-shadow" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <h3 style={{ fontSize: '1.25rem' }}>Informações Básicas</h3>
+              <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Rocket size={20} color="var(--primary)" /> Identidade Estratégica
+              </h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Nome da Startup</label>
-                  <input type="text" defaultValue="TechInova" style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }} />
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Propósito da Marca</label>
+                  <input name="brand_purpose" type="text" defaultValue={startup?.brand_purpose} placeholder="O 'porquê' da sua existência..." style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Segmento (Mercado)</label>
-                  <input type="text" defaultValue="SaaS B2B" style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }} />
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}><Eye size={16} /> Visão</label>
+                  <textarea name="vision" defaultValue={startup?.vision} placeholder="Onde querem chegar?" rows={3} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none', resize: 'none' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}><Target size={16} /> Missão</label>
+                  <textarea name="mission" defaultValue={startup?.mission} placeholder="Como vão chegar lá?" rows={3} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none', resize: 'none' }} />
                 </div>
                 <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Slogan / Propósito (One-liner)</label>
-                  <input type="text" defaultValue="Inovação com direção para o seu ecossistema." style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }} />
-                </div>
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Descrição Resumida</label>
-                  <textarea defaultValue="Plataforma de inteligência de dados focada em acelerar o processo de desenvolvimento e maturidade de startups dentro de ecossistemas corporativos e universitários." rows={4} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none', resize: 'vertical' }} />
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}><Heart size={16} /> Valores</label>
+                  <input name="values" type="text" defaultValue={startup?.values} placeholder="Inovação, Transparência, Foco no Cliente..." style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }} />
                 </div>
               </div>
             </div>
 
+            {/* Business Section */}
             <div className="card premium-shadow" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <h3 style={{ fontSize: '1.25rem' }}>Redes Sociais & Contato</h3>
+              <h3 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <DollarSign size={20} color="var(--primary)" /> Modelo de Negócio
+              </h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Website</label>
-                  <input type="url" defaultValue="https://techinova.com.br" style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }} />
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Público Alvo</label>
+                  <input name="target_audience" type="text" defaultValue={startup?.target_audience} placeholder="Ex: Gestores de RH de empresas Tech" style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>LinkedIn</label>
-                  <input type="url" defaultValue="linkedin.com/company/techinova" style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }} />
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Ticket Médio (R$)</label>
+                  <input name="avg_ticket" type="text" defaultValue={startup?.avg_ticket} placeholder="Ex: 1.500,00" style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }} />
                 </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Instagram</label>
-                  <input type="text" defaultValue="@techinova" style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Telefone / WhatsApp</label>
-                  <input type="tel" defaultValue="(11) 99999-9999" style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none' }} />
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Problema que Resolve</label>
+                  <textarea name="problem" defaultValue={startup?.problem} rows={3} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none', resize: 'vertical' }} />
                 </div>
               </div>
-              <button style={{ alignSelf: 'flex-end', padding: '0.75rem 1.5rem', background: 'var(--primary)', color: 'white', borderRadius: '8px', fontWeight: '600', marginTop: '1rem' }}>Salvar Alterações</button>
+              <button type="submit" className="premium-gradient" style={{ alignSelf: 'flex-end', padding: '0.75rem 2rem', color: 'white', borderRadius: '8px', fontWeight: '700' }}>Salvar Detalhes Estratégicos</button>
             </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div className="card premium-shadow" style={{ background: 'var(--primary)', color: 'white' }}>
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Status Atual</h3>
+             <div className="card premium-shadow" style={{ background: 'var(--primary)', color: 'white' }}>
+              <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Ficha Técnica</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: '0.5rem' }}>
                   <span style={{ fontSize: '0.85rem', opacity: 0.9 }}>Maturidade</span>
-                  <span style={{ fontWeight: 'bold' }}>Nível 4 (Tração)</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '0.85rem', opacity: 0.9 }}>Fundação</span>
-                  <span style={{ fontWeight: 'bold' }}>Mar/2023</span>
+                  <span style={{ fontWeight: 'bold' }}>{startup?.maturity_level || 'Nível 1 (Ideação)'}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: '0.5rem' }}>
                   <span style={{ fontSize: '0.85rem', opacity: 0.9 }}>CNPJ</span>
-                  <span style={{ fontWeight: 'bold' }}>12.345.678/0001-99</span>
+                  <span style={{ fontWeight: 'bold' }}>{startup?.cnpj || 'Não informado'}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '0.85rem', opacity: 0.9 }}>Vínculo Institucional</span>
-                  <span style={{ fontWeight: 'bold' }}>Aceleradora Órbita</span>
+                  <span style={{ fontSize: '0.85rem', opacity: 0.9 }}>Website</span>
+                  <a href={startup?.website} target="_blank" style={{ color: 'white', fontWeight: 'bold' }}>Acessar</a>
                 </div>
               </div>
             </div>
-
+            
             <div className="card premium-shadow">
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Documentos Anexos</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <div style={{ padding: '0.75rem', background: 'var(--muted)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>Contrato Social.pdf</span>
-                  <span style={{ color: 'var(--primary)', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer' }}>Baixar</span>
-                </div>
-                <div style={{ padding: '0.75rem', background: 'var(--muted)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>Acordo de Sócios.pdf</span>
-                  <span style={{ color: 'var(--primary)', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer' }}>Baixar</span>
-                </div>
-                <button style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px dashed var(--primary)', color: 'var(--primary)', fontWeight: '600', fontSize: '0.85rem', background: 'transparent' }}>+ Anexar Documento</button>
-              </div>
+               <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Documentos Rápidos</h3>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {startup?.contracts?.slice(0, 3).map((c: any) => (
+                    <div key={c.id} style={{ padding: '0.5rem', background: 'var(--secondary)', borderRadius: '4px', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between' }}>
+                      <span>{c.title}</span>
+                      <Edit3 size={14} />
+                    </div>
+                  ))}
+               </div>
             </div>
           </div>
-        </div>
+        </form>
       )}
 
       {activeTab === 'team' && (

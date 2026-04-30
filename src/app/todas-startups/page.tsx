@@ -1,23 +1,46 @@
 'use client';
 
-import React from 'react';
-import { Search, Filter, Building2, TrendingUp, Users, DollarSign, Download, MoreVertical } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Filter, Building2, TrendingUp, Users, DollarSign, Download, MoreVertical, Edit, Trash2, PowerOff } from 'lucide-react';
+import Modal from '@/components/ui/Modal';
+import { useAuth } from '@/context/AuthContext';
 
 export default function TodasStartupsPage() {
-  const startupsList = [
+  const { user } = useAuth();
+  const [startupsList, setStartupsList] = useState([
     { id: 1, name: 'TechInova', institution: 'Aceleradora Órbita', segment: 'SaaS B2B', stage: 'Tração', mrr: 'R$ 12.500', team: 4, status: 'Ativa' },
     { id: 2, name: 'EcoFlow', institution: 'Sebrae', segment: 'Cleantech', stage: 'Validação', mrr: 'R$ 1.800', team: 2, status: 'Ativa' },
     { id: 3, name: 'HealthLink', institution: 'Universidade Federal', segment: 'HealthTech', stage: 'MVP', mrr: 'R$ 0', team: 3, status: 'Em Risco' },
     { id: 4, name: 'AgroData', institution: 'Aceleradora Órbita', segment: 'AgriTech', stage: 'Escala', mrr: 'R$ 45.000', team: 12, status: 'Ativa' },
     { id: 5, name: 'EduVance', institution: 'Hub Inovação S/A', segment: 'EdTech', stage: 'Ideação', mrr: 'R$ 0', team: 2, status: 'Inativa' },
-  ];
+  ]);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedStartup, setSelectedStartup] = useState<any>(null);
+
+  const isAdmin = user?.role === 'admin';
+
+  const handleDelete = (id: number) => {
+    if (confirm('Deseja realmente excluir esta startup do ecossistema?')) {
+      setStartupsList(prev => prev.filter(s => s.id !== id));
+    }
+  };
+
+  const handleToggleStatus = (id: number) => {
+    setStartupsList(prev => prev.map(s => {
+      if (s.id === id) {
+        return { ...s, status: s.status === 'Ativa' ? 'Inativa' : 'Ativa' };
+      }
+      return s;
+    }));
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>Gestão de Startups</h1>
-          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.9rem' }}>Visualize e filtre todas as startups registradas no ecossistema.</p>
+          <p style={{ color: 'var(--muted-foreground)', fontSize: '0.9rem' }}>Painel administrativo para controle e monitoramento do ecossistema.</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button style={{ padding: '0.6rem 1.2rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', fontSize: '0.85rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'white' }}>
@@ -39,13 +62,8 @@ export default function TodasStartupsPage() {
           <option>Tração</option>
           <option>Escala</option>
         </select>
-        <select style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid var(--border)', outline: 'none', fontSize: '0.85rem' }}>
-          <option>Todas Instituições</option>
-          <option>Aceleradora Órbita</option>
-          <option>Sebrae</option>
-        </select>
         <button style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '0.85rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Filter size={18} /> Mais Filtros
+          <Filter size={18} /> Filtros
         </button>
       </div>
 
@@ -54,12 +72,10 @@ export default function TodasStartupsPage() {
           <thead>
             <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border)', background: 'var(--muted)' }}>
               <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>Startup</th>
-              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>Vínculo Institucional</th>
+              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>IE Vinculada</th>
               <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>Estágio</th>
-              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>MRR</th>
-              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>Equipe</th>
               <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>Status</th>
-              <th style={{ padding: '1rem 1.5rem' }}></th>
+              <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>AÇÕES</th>
             </tr>
           </thead>
           <tbody>
@@ -74,26 +90,49 @@ export default function TodasStartupsPage() {
                     </div>
                   </div>
                 </td>
-                <td style={{ padding: '1.25rem 1.5rem', fontSize: '0.9rem', color: 'var(--muted-foreground)', fontWeight: '500' }}>{s.institution}</td>
+                <td style={{ padding: '1.25rem 1.5rem', fontSize: '0.9rem', color: 'var(--muted-foreground)' }}>{s.institution}</td>
                 <td style={{ padding: '1.25rem 1.5rem' }}>
                   <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.5rem', background: 'var(--muted)', borderRadius: '4px', fontWeight: '600' }}>{s.stage}</span>
                 </td>
-                <td style={{ padding: '1.25rem 1.5rem', fontWeight: '600', fontSize: '0.9rem', color: s.mrr !== 'R$ 0' ? '#10b981' : 'var(--foreground)' }}>{s.mrr}</td>
-                <td style={{ padding: '1.25rem 1.5rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--muted-foreground)' }}><Users size={16}/> {s.team}</td>
                 <td style={{ padding: '1.25rem 1.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: s.status === 'Ativa' ? '#10b981' : s.status === 'Em Risco' ? '#f59e0b' : '#ef4444' }} />
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: s.status === 'Ativa' ? '#10b981' : '#ef4444' }} />
                     <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>{s.status}</span>
                   </div>
                 </td>
                 <td style={{ padding: '1.25rem 1.5rem', textAlign: 'right' }}>
-                  <button style={{ color: 'var(--muted-foreground)', padding: '0.5rem', borderRadius: '4px', cursor: 'pointer' }} className="menu-item-hover"><MoreVertical size={18} /></button>
+                   <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                      <button onClick={() => { setSelectedStartup(s); setIsModalOpen(true); }} style={{ color: 'var(--muted-foreground)' }} title="Editar"><Edit size={16}/></button>
+                      <button onClick={() => handleToggleStatus(s.id)} style={{ color: '#f59e0b' }} title="Inativar/Ativar"><PowerOff size={16}/></button>
+                      {isAdmin && <button onClick={() => handleDelete(s.id)} style={{ color: 'var(--destructive)' }} title="Excluir"><Trash2 size={16}/></button>}
+                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Editar Startup (Admin)">
+         <form style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600' }}>Nome</label>
+              <input defaultValue={selectedStartup?.name} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: '0.85rem', fontWeight: '600' }}>Instituição</label>
+              <select defaultValue={selectedStartup?.institution} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'white' }}>
+                 <option>Aceleradora Órbita</option>
+                 <option>Sebrae</option>
+                 <option>Universidade Federal</option>
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+              <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border)' }}>Cancelar</button>
+              <button className="premium-gradient" style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', color: 'white', fontWeight: 'bold' }}>Salvar</button>
+            </div>
+         </form>
+      </Modal>
     </div>
   );
 }

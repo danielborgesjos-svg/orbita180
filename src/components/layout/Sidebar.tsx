@@ -31,9 +31,10 @@ const Sidebar = () => {
     if (role === 'admin') {
       return [
         { icon: LayoutDashboard, label: 'Visão Global', href: '/' },
-        { icon: Building2, label: 'Instituições', href: '/instituicoes' },
-        { icon: Briefcase, label: 'Programas', href: '/programas' },
+        { icon: Building2, label: 'Instituições (IEs)', href: '/instituicoes' },
+        { icon: Briefcase, label: 'Projetos & Programas', href: '/programas' },
         { icon: Users, label: 'Todas Startups', href: '/todas-startups' },
+        { icon: Globe, label: 'Eventos & Editais', href: '/eventos' },
         { icon: ShieldCheck, label: 'Permissões Globais', href: '/permissoes' },
         ...commonMenus.slice(1)
       ];
@@ -62,6 +63,7 @@ const Sidebar = () => {
     return [
       { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
       { icon: Building2, label: 'Minha Startup', href: '/startup' },
+      { icon: FileText, label: 'Contratos', href: '/contratos' },
       { icon: Wallet, label: 'Financeiro', href: '/financeiro' },
       { icon: LayoutList, label: 'Kanban & Tarefas', href: '/kanban' },
       { icon: MessageSquare, label: 'CRM & WhatsApp', href: '/crm' },
