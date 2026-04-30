@@ -1,0 +1,421 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  name          String
+  password_hash String
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  preferences     UserPreference?
+  contextAccesses ContextAccess[]
+  roles           UserRole[]
+  activityLogs    ActivityLog[]
+  notifications   Notification[]
+
+  institutionMemberships InstitutionMember[]
+  startupMemberships     StartupMember[]
+  mentorProfile          Mentor?
+}
+
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  description String?
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  description String?
+  roles       RolePermission[]
+}
+
+model UserRole {
+  user_id String
+  role_id String
+
+  user User @relation(fields: [user_id], references: [id])
+  role Role @relation(fields: [role_id], references: [id])
+
+  @@id([user_id, role_id])
+}
+
+model RolePermission {
+  role_id       String
+  permission_id String
+
+  role       Role       @relation(fields: [role_id], references: [id])
+  permission Permission @relation(fields: [permission_id], references: [id])
+
+  @@id([role_id, permission_id])
+}
+
+model Institution {
+  id          String   @id @default(uuid())
+  name        String
+  logo        String?
+  description String?
+  status      String   @default("ACTIVE")
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  members  InstitutionMember[]
+  programs Program[]
+  startups StartupInstitution[]
+}
+
+model InstitutionMember {
+  id             String      @id @default(uuid())
+  institution_id String
+  user_id        String
+  role           String
+  status         String      @default("ACTIVE")
+  institution    Institution @relation(fields: [institution_id], references: [id])
+  user           User        @relation(fields: [user_id], references: [id])
+}
+
+model Program {
+  id             String      @id @default(uuid())
+  institution_id String
+  name           String
+  description    String?
+  start_date     DateTime?
+  end_date       DateTime?
+  status         String      @default("ACTIVE")
+  institution    Institution @relation(fields: [institution_id], references: [id])
+
+  startups StartupProgram[]
+  journeys Journey[]
+}
+
+model Startup {
+  id                     String   @id @default(uuid())
+  name                   String
+  logo                   String?
+  description_short      String?
+  description_long       String?
+  segment                String?
+  sector                 String?
+  stage                  String?
+  status                 String   @default("ACTIVE")
+  cnpj                   String?
+  city                   String?
+  state                  String?
+  country                String?
+  website                String?
+  linkedin               String?
+  instagram              String?
+  email                  String?
+  phone                  String?
+  problem                String?
+  solution               String?
+  target_audience        String?
+  value_proposition      String?
+  business_model         String?
+  revenue_sources        String?
+  market_size            String?
+  competitors            String?
+  competitive_advantages String?
+  tech_used              String?
+  maturity_level         String?
+  traction               String?
+  core_metrics           String?
+  pitch_short            String?
+  pitch_long             String?
+  pitch_deck_url         String?
+  notes                  String?
+  tags                   String?
+  created_by             String?
+  updated_by             String?
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+
+  members      StartupMember[]
+  institutions StartupInstitution[]
+  programs     StartupProgram[]
+  mentors      MentorStartup[]
+
+  journeyProgresses StartupJourneyProgress[]
+  tasks             StartupTask[]
+  diagnostics       StartupDiagnostic[]
+  feedbacks         StartupFeedback[]
+  metrics           StartupMetric[]
+  reports           StartupReport[]
+  documents         StartupDocument[]
+}
+
+model StartupMember {
+  id          String    @id @default(uuid())
+  startup_id  String
+  user_id     String
+  role        String
+  permissions String? // JSON string or comma-separated
+  status      String    @default("ACTIVE")
+  invited_by  String?
+  joined_at   DateTime?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  startup Startup @relation(fields: [startup_id], references: [id])
+  user    User    @relation(fields: [user_id], references: [id])
+}
+
+model StartupInstitution {
+  id                String   @id @default(uuid())
+  startup_id        String
+  institution_id    String
+  status            String   @default("ACTIVE")
+  relationship_type String?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  startup     Startup     @relation(fields: [startup_id], references: [id])
+  institution Institution @relation(fields: [institution_id], references: [id])
+}
+
+model StartupProgram {
+  id         String    @id @default(uuid())
+  startup_id String
+  program_id String
+  status     String    @default("ACTIVE")
+  entry_date DateTime?
+  exit_date  DateTime?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  startup Startup @relation(fields: [startup_id], references: [id])
+  program Program @relation(fields: [program_id], references: [id])
+}
+
+model Mentor {
+  id        String          @id @default(uuid())
+  user_id   String          @unique
+  bio       String?
+  expertise String?
+  user      User            @relation(fields: [user_id], references: [id])
+  startups  MentorStartup[]
+}
+
+model MentorStartup {
+  id         String   @id @default(uuid())
+  mentor_id  String
+  startup_id String
+  status     String   @default("ACTIVE")
+  mentor     Mentor   @relation(fields: [mentor_id], references: [id])
+  startup    Startup  @relation(fields: [startup_id], references: [id])
+
+  mentorships Mentorship[]
+}
+
+model Journey {
+  id          String   @id @default(uuid())
+  program_id  String
+  name        String
+  description String?
+  program     Program  @relation(fields: [program_id], references: [id])
+  steps       JourneyStep[]
+}
+
+model JourneyStep {
+  id          String   @id @default(uuid())
+  journey_id  String
+  title       String
+  description String?
+  order       Int
+  journey     Journey  @relation(fields: [journey_id], references: [id])
+
+  startupProgresses StartupJourneyProgress[]
+}
+
+model StartupJourneyProgress {
+  id              String      @id @default(uuid())
+  startup_id      String
+  journey_step_id String
+  status          String      @default("PENDING")
+  completed_at    DateTime?
+  startup         Startup     @relation(fields: [startup_id], references: [id])
+  step            JourneyStep @relation(fields: [journey_step_id], references: [id])
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  due_date    DateTime?
+  
+  startupTasks StartupTask[]
+}
+
+model StartupTask {
+  id          String   @id @default(uuid())
+  startup_id  String
+  task_id     String
+  status      String   @default("PENDING")
+  assigned_to String?
+
+  startup Startup @relation(fields: [startup_id], references: [id])
+  task    Task    @relation(fields: [task_id], references: [id])
+}
+
+model Diagnostic {
+  id          String               @id @default(uuid())
+  title       String
+  description String?
+  questions   DiagnosticQuestion[]
+  startups    StartupDiagnostic[]
+}
+
+model DiagnosticQuestion {
+  id            String   @id @default(uuid())
+  diagnostic_id String
+  question      String
+  type          String
+  diagnostic    Diagnostic @relation(fields: [diagnostic_id], references: [id])
+}
+
+model StartupDiagnostic {
+  id            String     @id @default(uuid())
+  startup_id    String
+  diagnostic_id String
+  status        String     @default("PENDING")
+  score         Float?
+  startup       Startup    @relation(fields: [startup_id], references: [id])
+  diagnostic    Diagnostic @relation(fields: [diagnostic_id], references: [id])
+}
+
+model Mentorship {
+  id               String   @id @default(uuid())
+  mentor_startup_id String
+  date             DateTime
+  summary          String?
+  status           String   @default("SCHEDULED")
+  
+  mentorStartup    MentorStartup @relation(fields: [mentor_startup_id], references: [id])
+  feedbacks        MentorFeedback[]
+}
+
+model MentorFeedback {
+  id            String     @id @default(uuid())
+  mentorship_id String
+  feedback_text String
+  rating        Int?
+  mentorship    Mentorship @relation(fields: [mentorship_id], references: [id])
+}
+
+model StartupFeedback {
+  id            String   @id @default(uuid())
+  startup_id    String
+  author_id     String
+  feedback_text String
+  created_at    DateTime @default(now())
+
+  startup Startup @relation(fields: [startup_id], references: [id])
+}
+
+model Metric {
+  id          String          @id @default(uuid())
+  name        String
+  description String?
+  startups    StartupMetric[]
+}
+
+model StartupMetric {
+  id         String   @id @default(uuid())
+  startup_id String
+  metric_id  String
+  value      String
+  date       DateTime @default(now())
+
+  startup Startup @relation(fields: [startup_id], references: [id])
+  metric  Metric  @relation(fields: [metric_id], references: [id])
+}
+
+model Report {
+  id       String          @id @default(uuid())
+  title    String
+  type     String
+  startups StartupReport[]
+}
+
+model StartupReport {
+  id         String  @id @default(uuid())
+  startup_id String
+  report_id  String
+  url        String
+
+  startup Startup @relation(fields: [startup_id], references: [id])
+  report  Report  @relation(fields: [report_id], references: [id])
+}
+
+model Document {
+  id       String            @id @default(uuid())
+  name     String
+  type     String
+  url      String
+  startups StartupDocument[]
+}
+
+model StartupDocument {
+  id          String   @id @default(uuid())
+  startup_id  String
+  document_id String
+
+  startup  Startup  @relation(fields: [startup_id], references: [id])
+  document Document @relation(fields: [document_id], references: [id])
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  user_id    String
+  message    String
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  user_id     String
+  action      String
+  entity_type String
+  entity_id   String
+  details     String?
+  created_at  DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model UserPreference {
+  id      String @id @default(uuid())
+  user_id String @unique
+  // Add preference fields here, e.g., theme, last accessed context, etc.
+  last_accessed_context_id String?
+  last_accessed_context_type String?
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model ContextAccess {
+  id           String   @id @default(uuid())
+  user_id      String
+  context_type String
+  context_id   String
+  role         String
+  is_default   Boolean  @default(false)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id])
+}
