@@ -164,7 +164,7 @@ const StartupDashboard = ({ user }: { user: any }) => {
         getStartupDashboardData(user.startupId).then(res => {
           if (res.success) {
             setDashData(res.data);
-            if (res.data.maturityLevel < 4) {
+            if (res.data && res.data.maturityLevel < 4) {
               setStatsIds(prev => prev.filter(id => id !== 'mrr'));
             }
           }

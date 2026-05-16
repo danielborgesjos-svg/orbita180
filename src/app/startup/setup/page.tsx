@@ -49,26 +49,27 @@ export default function StartupSetupPage() {
       if (!user?.id) return;
       const res = await getStartupByUserId(user.id);
       if (res.success && res.startup) {
-        setStartup(res.startup);
+        const startupData = res.startup;
+        setStartup(startupData);
         setForm(prev => ({
           ...prev,
-          name: res.startup.name || '',
-          cnpj: res.startup.cnpj || '',
-          website: res.startup.website || '',
-          instagram: res.startup.instagram || '',
-          city: res.startup.city || '',
-          state: res.startup.state || '',
-          stage: res.startup.stage || 'IDEACAO',
-          problem: res.startup.problem || '',
-          solution: res.startup.solution || '',
-          target_audience: res.startup.target_audience || '',
-          value_proposition: res.startup.value_proposition || '',
-          market_size: res.startup.market_size || '',
-          competitors: res.startup.competitors || '',
-          competitive_advantages: res.startup.competitive_advantages || '',
-          revenue_sources: res.startup.revenue_sources || '',
-          pitch_short: res.startup.pitch_short || '',
-          pitch_long: res.startup.pitch_long || '',
+          name: startupData.name || '',
+          cnpj: startupData.cnpj || '',
+          website: startupData.website || '',
+          instagram: startupData.instagram || '',
+          city: startupData.city || '',
+          state: startupData.state || '',
+          stage: startupData.stage || 'IDEACAO',
+          problem: startupData.problem || '',
+          solution: startupData.solution || '',
+          target_audience: startupData.target_audience || '',
+          value_proposition: startupData.value_proposition || '',
+          market_size: startupData.market_size || '',
+          competitors: startupData.competitors || '',
+          competitive_advantages: startupData.competitive_advantages || '',
+          revenue_sources: startupData.revenue_sources || '',
+          pitch_short: startupData.pitch_short || '',
+          pitch_long: startupData.pitch_long || '',
         }));
       }
       setLoading(false);
