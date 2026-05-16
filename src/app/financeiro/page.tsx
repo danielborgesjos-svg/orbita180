@@ -120,7 +120,7 @@ const FinancePage = () => {
 
   // --- CASH FLOW CALCULATION (Last 6 Months) ---
   const cashFlowData = useMemo(() => {
-    const months = [];
+    const months: any[] = [];
     const now = new Date();
     
     for (let i = 5; i >= 0; i--) {
