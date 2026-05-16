@@ -19,14 +19,14 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  login: async () => false,
+  login: async () => ({ success: false, error: 'Not initialized' }),
   logout: () => {},
   isLoading: true,
 });

@@ -14,7 +14,7 @@ import {
   Save
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { prisma } from '@/lib/prisma';
+import db from '@/lib/db';
 import { getStartupDashboardData } from '@/lib/actions/dashboard';
 
 const MaturityPage = () => {
